@@ -14,3 +14,9 @@ while True:
         
         # Ispis podataka s vremenom
         print(f"Time: {current_time} - {arduino_data}")
+
+        save_data = open("data.txt", "a")
+        save_data.write(f"{current_time} - {arduino_data}\n")
+        save_data.close()
+
+        
