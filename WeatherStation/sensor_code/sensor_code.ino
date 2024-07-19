@@ -48,5 +48,5 @@ void loop() {
   Serial.print(pressure);
   Serial.println(F(" hPa"));
 
-  delay(10000); // Čekanje dvije sekunde prije sljedećeg čitanja
+  delay(2000); // Čekanje dvije sekunde prije sljedećeg čitanja
 }
