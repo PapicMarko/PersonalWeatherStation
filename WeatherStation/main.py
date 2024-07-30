@@ -1,30 +1,45 @@
 import serial
 import time
 import pandas as pd
+import os
 
-# Otvaranje serijske veze (prilagodi 'COM3' tvojoj situaciji)
-ser = serial.Serial('COM3', 9600)  # Provjeri koji COM port koristi tvoj Arduino
+# Funkcija za izračunavanje pomičnog prosjeka
+def moving_average(data, window_size):
+    return round(sum(data[-window_size:]) / window_size, 2)
 
-# Inicijalizacija liste za spremanje podataka
+# Funkcija za generiranje imena datoteke
+def generate_filename(base_name):
+    suffix = 'a'
+    while os.path.exists(f"{base_name}_{suffix}.csv"):
+        suffix = chr(ord(suffix) + 1)
+    return f"{base_name}_{suffix}.csv"
+
+# Serijski port i baud rate - provjerite koji je vaš port i prilagodite
+ser = serial.Serial('COM3', 9600)  # Zamijenite 'COM3' s vašim portom
+
+# Funkcija za generiranje novog imena datoteke na temelju trenutnog datuma
+def get_new_filename():
+    date_str = time.strftime("%d.%m")
+    filename_base = f"sensor_data_{date_str}"
+    return generate_filename(filename_base)
+
+filename = get_new_filename()
 data = []
-# Inicijalizacija brojača za očitanja
 reading_counter = 0
-
-# Funkcija za izračunavanje srednje vrijednosti
-def moving_average(data_list, window_size):
-    if len(data_list) < window_size:
-        return round(sum(data_list) / len(data_list), 2)
-    else:
-        return round(sum(data_list[-window_size:]) / window_size, 2)
 
 while True:
     if ser.in_waiting > 0:
         # Čitanje serijskih podataka
         arduino_data = ser.readline().decode('utf-8').rstrip()
 
-        # Dohvaćanje trenutnog vremena
-        current_time = time.strftime("%c", time.localtime())
+        # Dohvaćanje trenutnog vremena i datuma
+        current_time = time.strftime("%H:%M:%S", time.localtime())
+        current_date = time.strftime("%d.%m", time.localtime())
         
+        # Provjera promjene datuma i generiranje novog imena datoteke
+        if f"sensor_data_{current_date}" not in filename:
+            filename = get_new_filename()
+
         # Ispis podataka s vremenom
         print(f"Time: {current_time} - {arduino_data}")
         
@@ -65,4 +80,5 @@ while True:
 
         # Spremanje podataka u CSV datoteku
         df = pd.DataFrame(data, columns=['Vrijeme', 'Vlažnost (%)', 'Temperatura (°C)', 'Tlak (hPa)', 'Prosječna Vlažnost (%)', 'Prosječna Temperatura (°C)', 'Prosječni Tlak (hPa)'])
-        df.to_csv('sensor_data.csv', index=False)
+        df.to_csv(filename, index=False)
+
