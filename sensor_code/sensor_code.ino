@@ -77,5 +77,5 @@ void loop() {
   Serial.print(windSpeed);
   Serial.println(" m/s");
 
-  delay(3000); // Čekanje tri sekunde prije sljedećeg čitanja
+  delay(300000); // Čekanje tri sekunde prije sljedećeg čitanja
 }
